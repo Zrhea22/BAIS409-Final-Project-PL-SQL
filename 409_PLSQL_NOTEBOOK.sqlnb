@@ -1,0 +1,1002 @@
+cells:
+  - kind: 1
+    value: "# BAIS 409 PL/SQL Project "
+    languageId: markdown
+  - kind: 1
+    value: "### Build Tables \r
+
+      ___\r
+
+      \r
+
+      (Data was exported using the Oracle SQL Developer .csv import function.
+      This was due to tables in this database containing 100,000+ records) "
+    languageId: markdown
+  - kind: 2
+    value: "-- Drop Tables\r
+
+      drop table sales;\r
+
+      drop table store;\r
+
+      drop table product;\r
+
+      drop table customer;\r
+
+      drop table calendar;"
+    languageId: oracle-sql
+  - kind: 2
+    value: "-- 1. Create Calendar Table\r
+
+      \r
+
+      CREATE TABLE calendar (\r
+
+      \    date_id      VARCHAR(8) PRIMARY KEY,\r
+
+      \    date_value   DATE NOT NULL,\r
+
+      \    year         NUMBER(4),\r
+
+      \    month        NUMBER(2),\r
+
+      \    day          NUMBER(2),\r
+
+      \    week         NUMBER(2),\r
+
+      \    day_of_week  NUMBER(1)\r
+
+      );"
+    languageId: oracle-sql
+  - kind: 2
+    value: "-- 2. Create Customer Table \r
+
+      \r
+
+      CREATE TABLE customer (\r
+
+      \    customer_id     VARCHAR2(10) PRIMARY KEY,\r
+
+      \    age             NUMBER(3),\r
+
+      \    gender          VARCHAR2(10),\r
+
+      \    loyalty_member  NUMBER(1) CHECK (loyalty_member IN (0,1)),\r
+
+      \    join_date       DATE\r
+
+      );"
+    languageId: oracle-sql
+  - kind: 2
+    value: "-- 3. Create Product Table \r
+
+      \r
+
+      CREATE TABLE product (\r
+
+      \    product_id      VARCHAR2(10) PRIMARY KEY,\r
+
+      \    product_name    VARCHAR2(100),\r
+
+      \    brand           VARCHAR2(50),\r
+
+      \    category        VARCHAR2(50),\r
+
+      \    cocoa_percent   NUMBER(5,2),\r
+
+      \    weight_g        NUMBER(6,2)\r
+
+      );"
+    languageId: oracle-sql
+  - kind: 2
+    value: "-- 4. Create Store Table \r
+
+      \r
+
+      CREATE TABLE store (\r
+
+      \    store_id     VARCHAR2(10) PRIMARY KEY,\r
+
+      \    store_name   VARCHAR2(100),\r
+
+      \    city         VARCHAR2(50),\r
+
+      \    country      VARCHAR2(50),\r
+
+      \    store_type   VARCHAR2(50)\r
+
+      );"
+    languageId: oracle-sql
+  - kind: 2
+    value: "-- 5. Create Sales Table \r
+
+      \r
+
+      CREATE TABLE sales (\r
+
+      \    order_id     VARCHAR2(15),\r
+
+      \    date_id      VARCHAR(8),\r
+
+      \    product_id   VARCHAR2(10),\r
+
+      \    store_id     VARCHAR2(10),\r
+
+      \    customer_id  VARCHAR2(10),\r
+
+      \    quantity     NUMBER(5),\r
+
+      \    unit_price   NUMBER(8,2),\r
+
+      \    discount     NUMBER(4,2),\r
+
+      \    revenue      NUMBER(10,2),\r
+
+      \    cost         NUMBER(10,2),\r
+
+      \    profit       NUMBER(10,2),\r
+
+      \r
+
+      \    PRIMARY KEY (order_id, product_id),\r
+
+      \r
+
+      \    FOREIGN KEY (date_id) REFERENCES calendar(date_id),\r
+
+      \    FOREIGN KEY (product_id) REFERENCES product(product_id),\r
+
+      \    FOREIGN KEY (store_id) REFERENCES store(store_id),\r
+
+      \    FOREIGN KEY (customer_id) REFERENCES customer(customer_id)\r
+
+      );"
+    languageId: oracle-sql
+  - kind: 2
+    value: "drop table sales "
+    languageId: oracle-sql
+  - kind: 1
+    value: "### Display Tables \r\n___"
+    languageId: markdown
+  - kind: 2
+    value: "--Display Calendar Table \r
+
+      select * from CALENDAR;"
+    languageId: oracle-sql
+  - kind: 2
+    value: "--Display Customer Data \r
+
+      select * from CUSTOMER;"
+    languageId: oracle-sql
+  - kind: 2
+    value: "--Display Product Data\r
+
+      select * from PRODUCT;"
+    languageId: oracle-sql
+  - kind: 2
+    value: "--Display Store Data\r
+
+      select * from STORE; "
+    languageId: oracle-sql
+  - kind: 2
+    value: "--Display Sales Data \r
+
+      select * from SALES;"
+    languageId: oracle-sql
+  - kind: 1
+    value: "### PL/SQL Queries\r\n___"
+    languageId: markdown
+  - kind: 2
+    value: SET SERVEROUTPUT ON;
+    languageId: oracle-sql
+  - kind: 1
+    value: "##### 1. Retrieve the total revenue, total cost, total profit, and
+      product name associated with the order ID '0RD00000179'."
+    languageId: markdown
+  - kind: 2
+    value: "DECLARE\r
+
+      \    v_product_name  product.product_name%type;\r
+
+      \    v_revenue       sales.revenue%type;\r
+
+      \    v_cost          sales.cost%type;\r
+
+      \    v_profit        sales.profit%type;\r
+
+      \    v_order_id      sales.order_id%type := '0RD00000179';\r
+
+      \r
+
+      BEGIN\r
+
+      \    select p.product_name, s.revenue, s.cost, s.profit\r
+
+      \    into v_product_name, v_revenue, v_cost, v_profit\r
+
+      \    from sales s, product p \r
+
+      \    where s.product_id = p.product_id\r
+
+      \    and s.order_id = v_order_id;\r
+
+      \r
+
+      DBMS_OUTPUT.PUT_LINE('Order ID: ' || v_order_id);\r
+
+      DBMS_OUTPUT.PUT_LINE(RPAD('-', 100, '-')); --Use rpad to add \"-\" to
+      right side \r
+
+      DBMS_OUTPUT.PUT_LINE('Product Name: ' || v_product_name);\r
+
+      \r
+
+      --Use TO_CHAR for money format\r
+
+      DBMS_OUTPUT.PUT_LINE('Revenue: ' || TO_CHAR(v_revenue,
+      '$999,999,999.00'));\r
+
+      DBMS_OUTPUT.PUT_LINE('Cost:    ' || TO_CHAR(v_cost, '$999,999,999.00'));\r
+
+      DBMS_OUTPUT.PUT_LINE('Profit:  ' || TO_CHAR(v_profit,
+      '$999,999,999.00'));\r
+
+      \r
+
+      DBMS_OUTPUT.PUT_LINE(RPAD('-', 100, '-'));\r
+
+      \r
+
+      END;"
+    languageId: oracle-sql
+  - kind: 1
+    value: "#### 2. A sales event is going on and there will be an additional
+      discount added on top of all orders (including existing discounts).
+      Calculate the discount amount for the different orders based on their
+      total revenue. Orders with above $50 revenue recieve a 10 percent
+      discount, orders between $25 and $50 receive a 5 percent discount, and all
+      others recieve no discount. \r\n"
+    languageId: markdown
+  - kind: 2
+    value: "/*\r
+
+      Above 50 dollars - '0RD00000001'\r
+
+      In between 25 and 50 dollars - '0RD00000004'\r
+
+      Less than 24 dollars -  '0RD00001136'\r
+
+      */\r
+
+      DECLARE \r
+
+      \    v_order_id   sales.order_id%type := '0RD00000001';\r
+
+      \     v_revenue  number(10,2);\r
+
+      \    --Initialize Varibales\r
+
+      \    v_disc_amt  number(10,2);\r
+
+      \    v_final_rev number(10,2);\r
+
+      \r
+
+      BEGIN\r
+
+      \    select SUM(revenue)\r
+
+      \    into v_revenue\r
+
+      \    from sales \r
+
+      \    where order_id = v_order_id;\r
+
+      \   \r
+
+      \r
+
+      \    CASE\r
+
+      \        when v_revenue > 50 then \r
+
+      \            v_disc_amt := v_revenue * 0.10;\r
+
+      \        when v_revenue between 25 and 50 then \r
+
+      \            v_disc_amt := v_revenue * 0.05;\r
+
+      \        else \r
+
+      \            v_disc_amt := 0;\r
+
+      \    END CASE;\r
+
+      \r
+
+      \    --Calcauate Final Revenue\r
+
+      \    v_final_rev := v_revenue - v_disc_amt;\r
+
+      \r
+
+      \    DBMS_OUTPUT.PUT_LINE('Order ID: '         || v_order_id);\r
+
+      \    DBMS_OUTPUT.PUT_LINE(RPAD('-', 100, '-'));\r
+
+      \    DBMS_OUTPUT.PUT_LINE('Original Revenue: ' || TO_CHAR(v_revenue,
+      '$999,999.00'));\r
+
+      \    DBMS_OUTPUT.PUT_LINE('Discount Applied: ' || TO_CHAR(v_disc_amt,
+      '$999,999.00'));\r
+
+      \    DBMS_OUTPUT.PUT_LINE('Final Revenue:    ' || TO_CHAR(v_final_rev,
+      '$999,999.00'));\r
+
+      \    DBMS_OUTPUT.PUT_LINE(RPAD('-', 100, '-'));\r
+
+      \r
+
+      END;\r\n"
+    languageId: oracle-sql
+  - kind: 1
+    value: "#### 3. Loop through all sales records and display the order date,
+      customer ID, quantity, and product name for orders where the quantity is
+      greater than 4 and the product is Milk Chocolate 60%."
+    languageId: markdown
+  - kind: 2
+    value: "DECLARE\r
+
+      \    CURSOR sales_cursor IS --Cursor b/c returning several rows\r
+
+      \    select c.date_value,\r
+
+      \        s.customer_id,\r
+
+      \        s.quantity,\r
+
+      \        p.product_name\r
+
+      \    from sales s, calendar c, product p\r
+
+      \    where s.product_id = p.product_id\r
+
+      \    and s.date_id = c.date_id\r
+
+      \    and p.product_name = 'Milk Chocolate 60%'\r
+
+      \    and s.quantity > 4;\r
+
+      \r
+
+      BEGIN\r
+
+      \    DBMS_OUTPUT.PUT_LINE(RPAD('-', 80, '-'));\r
+
+      \    DBMS_OUTPUT.PUT_LINE('High Quantity Orders (Quantity > 4)');\r
+
+      \    DBMS_OUTPUT.PUT_LINE(RPAD('-', 80, '-'));\r
+
+      \r
+
+      \    for rec in sales_cursor LOOP \r
+
+      \        DBMS_OUTPUT.PUT_LINE(\r
+
+      \            RPAD('Date: ' || rec.date_value, 20) ||\r
+
+      \            RPAD('Customer: ' || rec.customer_id, 20) ||\r
+
+      \            RPAD('Qty: ' || rec.quantity, 10) || --Quantity was having
+      issues displaying so I used TO__CHAR\r
+
+      \            'Product: ' || rec.product_name\r
+
+      \        );\r
+
+      \    END LOOP;\r
+
+      \    \r
+
+      \    DBMS_OUTPUT.PUT_LINE(RPAD('-', 80, '-'));\r
+
+      \r
+
+      END;"
+    languageId: oracle-sql
+  - kind: 1
+    value: "#### 4. Select all sales records from a specific date and classify each
+      sale based on its revenue into three categories:\r
+
+      \r
+
+      - High if revenue is greater than or equal to $50\r
+
+      - Medium if revenue is between $25 and $50\r
+
+      - Low if revenue is less than $25"
+    languageId: markdown
+  - kind: 2
+    value: "DECLARE\r
+
+      \    cursor sales_cursor is \r
+
+      \        select s.order_id,\r
+
+      \            c.date_value,\r
+
+      \            s.revenue\r
+
+      \        from sales s, calendar c\r
+
+      \        where s.date_id = c.date_id\r
+
+      \        and s.quantity > 4\r
+
+      \        and s.date_id= 'C572';\r
+
+      \r
+
+      --Initialize Classification Variable\r
+
+      \    v_classification varchar(20);\r
+
+      \r
+
+      BEGIN\r
+
+      \    DBMS_OUTPUT.PUT_LINE(RPAD('-', 100, '-'));\r
+
+      \    DBMS_OUTPUT.PUT_LINE('Order | Date | Revenue | Classification');\r
+
+      \    DBMS_OUTPUT.PUT_LINE(RPAD('-', 100, '-'));\r
+
+      \r
+
+      \    for rec in sales_cursor LOOP\r
+
+      \    --Revenue Classification\r
+
+      \    CASE\r
+
+      \        when rec.revenue > 50 THEN\r
+
+      \            v_classification := 'High';\r
+
+      \        when rec.revenue between 25 and 50 then \r
+
+      \            v_classification := 'Medium';\r
+
+      \        else \r
+
+      \            v_classification := 'Low';\r
+
+      \r
+
+      \        END CASE;\r
+
+      \r
+
+      \        DBMS_OUTPUT.PUT_LINE(\r
+
+      \            RPAD('Order: ' || rec.order_id, 20) ||\r
+
+      \            RPAD('Date: ' || TO_CHAR(rec.date_value, 'MM/DD/YYYY'), 20)
+      ||\r
+
+      \            RPAD('Rev: ' || TO_CHAR(rec.revenue, '$999,999.00'), 20) ||\r
+
+      \            'Class: ' || v_classification\r
+
+      \        );\r
+
+      \r
+
+      \    END LOOP;\r
+
+      \r
+
+      \    DBMS_OUTPUT.PUT_LINE(RPAD('-', 100, '-'));\r
+
+      \r
+
+      END;\r
+
+      \r\n"
+    languageId: oracle-sql
+  - kind: 1
+    value: "#### 5. Count the number of purchases made by the top 50 customers with
+      the highest number of purchases.\r\n"
+    languageId: markdown
+  - kind: 2
+    value: "DECLARE\r
+
+      \    cursor cust_cursor is \r
+
+      \        select * \r
+
+      \        from (\r
+
+      \            select customer_id,\r
+
+      \                count(*) total_purchases\r
+
+      \            from sales \r
+
+      \            group by CUSTOMER_ID\r
+
+      \            order by total_purchases desc)\r
+
+      \        where rownum <= 50; --First 50 rows \r
+
+      BEGIN\r
+
+      \    DBMS_OUTPUT.PUT_LINE(RPAD('-', 60, '-'));\r
+
+      \    DBMS_OUTPUT.PUT_LINE('Customer Purchase Summary');\r
+
+      \    DBMS_OUTPUT.PUT_LINE(RPAD('-', 60, '-'));\r
+
+      \r
+
+      for rec in cust_cursor LOOP\r
+
+      \    DBMS_OUTPUT.PUT_LINE(\r
+
+      \        RPAD('Customer: ' || rec.customer_id, 25) ||\r
+
+      \        'Purchases: ' || rec.total_purchases);\r
+
+      \    END LOOP;\r
+
+      \   \r
+
+      \    DBMS_OUTPUT.PUT_LINE(RPAD('-', 60, '-'));\r
+
+      \r
+
+      END;    "
+    languageId: oracle-sql
+  - kind: 1
+    value: "#### 6. Try retreiving a customer that doesn't exist from sales, then
+      link the output to the oracle error.     "
+    languageId: markdown
+  - kind: 2
+    value: "DECLARE\r
+
+      \    ex_cust_id EXCEPTION;\r
+
+      \    pragma exception_init(ex_cust_id, -2291);\r
+
+      BEGIN\r
+
+      \    update sales\r
+
+      \    set customer_id = 'C050001' --Customer table ends at C050000\r
+
+      \    WHERE order_id = '0RD00000001';\r
+
+      EXCEPTION\r
+
+      \    when ex_cust_id then \r
+
+      \    DBMS_OUTPUT.PUT_LINE('No customer number found in customer table');\r
+
+      \r
+
+      END;\r
+
+      \    "
+    languageId: oracle-sql
+  - kind: 1
+    value: "#### 7. Attempt to insert a new customer into the customer table and
+      display an error message if the customer ID already exists."
+    languageId: markdown
+  - kind: 2
+    value: "DECLARE \r
+
+      \    ex_customer_pk EXCEPTION;\r
+
+      \    pragma exception_init(ex_customer_pk, -00001);\r
+
+      \r
+
+      BEGIN  \r
+
+      \    insert into customer \r
+
+      \    values ('C000001', 25, 'Male', 1,
+      TO_DATE('05/21/2025','MM/DD/YYYY'));\r
+
+      \r
+
+      EXCEPTION \r
+
+      \    when ex_customer_pk then \r
+
+      \    DBMS_OUTPUT.PUT_LINE('Primary key violation - Customer ID already
+      exists');\r
+
+      \r
+
+      END;\r\n"
+    languageId: oracle-sql
+  - kind: 1
+    value: "#### 8. Create a function that returns the total revenue generated by a
+      given product. "
+    languageId: markdown
+  - kind: 2
+    value: "--Drop Function\r
+
+      drop function get_total_revenue;"
+    languageId: oracle-sql
+  - kind: 2
+    value: "--Function\r
+
+      CREATE or replace function get_total_revenue (\r
+
+      \    p_product_id in varchar2\r
+
+      )\r
+
+      return number \r
+
+      is \r
+
+      \    v_total_revenue Number(12,2);\r
+
+      BEGIN\r
+
+      \    select sum(revenue)\r
+
+      \    into v_total_revenue\r
+
+      \    from sales\r
+
+      \    where product_id = p_product_id;\r
+
+      \    return v_total_revenue;\r
+
+      \r
+
+      END;\r
+
+      \r\n"
+    languageId: oracle-sql
+  - kind: 2
+    value: "--Use Function\r
+
+      DECLARE \r
+
+      \    v_result number;\r
+
+      BEGIN\r
+
+      \    v_result := get_total_revenue('P0160');\r
+
+      \r
+
+      \    DBMS_OUTPUT.PUT_LINE('Total Revenue: ' || TO_CHAR(v_result,
+      '$999,999.00'));\r
+
+      \r
+
+      END;"
+    languageId: oracle-sql
+  - kind: 1
+    value: "#### 9. Create a procedure to reset all discounts in the sales table to
+      zero."
+    languageId: markdown
+  - kind: 2
+    value: "--Drop copy of sales table\r
+
+      drop table sales_2;"
+    languageId: oracle-sql
+  - kind: 2
+    value: "--Create copy of sales table \r
+
+      create table sales_2 as select * from SALES;"
+    languageId: oracle-sql
+  - kind: 2
+    value: "--Drop Procedure\r
+
+      drop procedure reset_all_discounts"
+    languageId: oracle-sql
+  - kind: 2
+    value: "--Create Procedure\r
+
+      CREATE or replace procedure reset_all_discounts\r
+
+      IS\r
+
+      BEGIN\r
+
+      \    update SALES_2\r
+
+      \    set discount = 0;\r
+
+      \r
+
+      DBMS_OUTPUT.PUT_LINE('All discounts have been reset to zero.');\r
+
+      \r
+
+      END;\r\n"
+    languageId: oracle-sql
+  - kind: 2
+    value: "--Run Procedure\r
+
+      BEGIN\r
+
+      \    reset_all_discounts;\r
+
+      END;"
+    languageId: oracle-sql
+  - kind: 2
+    value: select * from sales_2
+    languageId: oracle-sql
+  - kind: 1
+    value: "#### 10. Use a package to perform multiple operations including;
+      calcualting total revenue for a product, retreiving product information
+      and applying discounts, then displaying the results. "
+    languageId: markdown
+  - kind: 2
+    value: "--Drop Package \r
+
+      drop PACKAGE sales_pkg;\r
+
+      --Drop copy of sales table\r
+
+      drop table sales_2;"
+    languageId: oracle-sql
+  - kind: 2
+    value: "--Create copy of sales table \r
+
+      create table sales_2 as select * from SALES;"
+    languageId: oracle-sql
+  - kind: 2
+    value: "--Create Package\r
+
+      CREATE or replace package sales_pkg as \r
+
+      \    function get_total_revenue (\r
+
+      \        p_product_id in varchar2\r
+
+      \    ) return number;\r
+
+      \r
+
+      \    function get_product_name (\r
+
+      \        p_product_id in varchar2\r
+
+      \    ) return varchar2;\r
+
+      \r
+
+      \    procedure apply_discount ( \r
+
+      \        p_order_id in varchar2, \r
+
+      \        p_discount in number \r
+
+      \    );\r
+
+      \    \r
+
+      \    procedure reset_discount ( \r
+
+      \        p_order_id in varchar2,\r
+
+      \        p_discount in number\r
+
+      \    );\r
+
+      \r
+
+      END sales_pkg;\r\n"
+    languageId: oracle-sql
+  - kind: 2
+    value: "--Package Body\r
+
+      CREATE or replace package body sales_pkg as \r
+
+      \r
+
+      --Function: Total Revenue \r
+
+      function get_total_revenue (\r
+
+      \    p_product_id in varchar2\r
+
+      ) return NUMBER\r
+
+      is \r
+
+      \    v_total number(12,2);\r
+
+      BEGIN\r
+
+      \    select SUM(revenue)\r
+
+      \    into v_total \r
+
+      \    from sales_2\r
+
+      \    where product_id = p_product_id;\r
+
+      \r
+
+      \    return v_total;\r
+
+      END;\r
+
+      \r
+
+      --Function: Product Name \r
+
+      Function get_product_name (\r
+
+      \    p_product_id in varchar2\r
+
+      ) return varchar2\r
+
+      is \r
+
+      \    v_name product.product_name%type;\r
+
+      BEGIN\r
+
+      \    select product_name\r
+
+      \    into v_name\r
+
+      \    from product\r
+
+      \    where product_id = p_product_id;\r
+
+      \r
+
+      \    return v_name;\r
+
+      END;\r
+
+      \r
+
+      --Procedure: Apply Discount \r
+
+      procedure apply_discount (\r
+
+      \    p_order_id in varchar2,\r
+
+      \    p_discount in number\r
+
+      ) \r
+
+      is \r
+
+      BEGIN\r
+
+      \    Update sales_2 \r
+
+      \    set revenue = revenue * (1 - p_discount)\r
+
+      \    where order_id = p_order_id;\r
+
+      END;\r
+
+      \r
+
+      --Procedure: Reset Discount \r
+
+      procedure reset_discount (\r
+
+      \    p_order_id in varchar2,\r
+
+      \    p_discount in number \r
+
+      )\r
+
+      is\r
+
+      BEGIN\r
+
+      \    update sales_2\r
+
+      \    set revenue = revenue / (1 - p_discount)\r
+
+      \    where order_id = p_order_id;\r
+
+      END;\r
+
+      \r
+
+      END sales_pkg;"
+    languageId: oracle-sql
+  - kind: 2
+    value: "--Main Program\r
+
+      DECLARE \r
+
+      \    v_revenue   NUMBER;\r
+
+      \    v_name      VARCHAR2(100);\r
+
+      \    v_old_rev   NUMBER;\r
+
+      \    v_new_rev   NUMBER;\r
+
+      \r
+
+      BEGIN\r
+
+      \    --Get total revenue \r
+
+      \    v_revenue := sales_pkg.get_total_revenue('P0001');\r
+
+      \    DBMS_OUTPUT.PUT_LINE('Total Revenue: ' || TO_CHAR(v_revenue,
+      '$999,999.00'));\r
+
+      \r
+
+      \    --Get product name\r
+
+      \    v_name := sales_pkg.get_product_name('P0001');\r
+
+      \    DBMS_OUTPUT.PUT_LINE('Product Name: ' || v_name);\r
+
+      \r
+
+      \    --Get original revenue for an order\r
+
+      \    SELECT revenue INTO v_old_rev\r
+
+      \    FROM sales_2\r
+
+      \    WHERE order_id = '0RD00000001';\r
+
+      \    --Print original revenue\r
+
+      \    DBMS_OUTPUT.PUT_LINE('Original Revenue: ' || v_old_rev);\r
+
+      \r
+
+      \    --Apply discount\r
+
+      \    sales_pkg.apply_discount('0RD00000001', 0.10);\r
+
+      \r
+
+      \    select revenue into v_new_rev\r
+
+      \    from sales_2\r
+
+      \    where order_id = '0RD00000001';\r
+
+      \r
+
+      \    DBMS_OUTPUT.PUT_LINE('After Discount: ' || v_new_rev);\r
+
+      \r
+
+      \    --Reset discount (Restores revenue to original value)\r
+
+      \    sales_pkg.reset_discount('0RD00000001', 0.10);\r
+
+      \r
+
+      \    select revenue into v_old_rev\r
+
+      \    from sales_2\r
+
+      \    where order_id = '0RD00000001';\r
+
+      \r
+
+      \    DBMS_OUTPUT.PUT_LINE('Reset Revenue: ' || v_old_rev);\r
+
+      \r
+
+      END;\r\n"
+    languageId: oracle-sql
